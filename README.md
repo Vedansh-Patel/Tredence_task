@@ -24,26 +24,36 @@ It includes a working implementation of a **Code Review Agent** that mimics a lo
 
 ## Testing the Workflow 
 
-1. You can use the automated Swagger UI at http://127.0.0.1:8000/docs or curl.
+The easiest way to test the API is using the built-in Swagger UI. You don't need to use the terminal for requests.
 
-2. Trigger a Run:
+**Step 1: Start the Workflow**
+1.  Ensure the server is running (`python run.py`) and open your browser to [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+2.  Click on the green **POST** bar labeled `/graph/run`.
+3.  Click the **Try it out** button on the right.
+4.  In the **Request body** box, paste the following JSON:
+    ```json
+    {
+      "graph_id": "code_review_agent",
+      "initial_state": {
+        "raw_code": "def hello(): print(1)"
+      }
+    }
+    ```
+5.  Click the big blue **Execute** button.
+6.  Scroll down to the **Server response** and copy the `run_id` (e.g., `"4a6feb1b-..."`).
 
-   curl -X POST "http://127.0.0.1:8000/graph/run" \
-     -H "Content-Type: application/json" \
-     -d '{
-           "graph_id": "code_review_agent",
-           "initial_state": {
-             "raw_code": "def complex_function(): ... "
-           }
-         }'
+**Step 2: Check the Results**
+1.  Stay in the Swagger UI and scroll down to the blue **GET** bar labeled `/graph/state/{run_id}`.
+2.  Click the **Try it out** button.
+3.  Paste the `run_id` you copied earlier into the text box.
+4.  Click the big blue **Execute** button.
 
-3. Check Status: 
-   Use the run_id returned from the previous step
-   curl -X GET "http://127.0.0.1:8000/graph/state/{YOUR_RUN_ID}"
+**What you will see:**
+In the response body, look for:
+*   **"status"**: It should say `"completed"` (since the background task finished).
+*   **"history"**: A list of steps showing the agent detecting issues, checking the score, and looping.
+*   **"current_state"**: The final data (e.g., `complexity_score: 0`).
 
-4. Real time Streaming: 
-   Connect via WebSocket to see logs as they happen:
-   ws://127.0.0.1:8000/ws/logs/{YOUR_RUN_ID}
 
 ## Features and Capabilities 
 
@@ -71,3 +81,5 @@ It includes a working implementation of a **Code Review Agent** that mimics a lo
     Visualization: Build a simple frontend using React Flow to visualize the execution path and state changes in real-time.
 
     Error Recovery: Add a "human-in-the-loop" feature where a workflow pauses on error and waits for manual API intervention to resume
+
+    
